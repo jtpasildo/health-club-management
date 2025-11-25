@@ -1,5 +1,5 @@
 from datetime import datetime
-from db import addMember, getAllMembers, getMemberByEmail, addHealthMetric, getMetricsForMember, updateMemberProfile
+from db import addMember, getAllMembers, getMemberByEmail, addHealthMetric, getMetricsForMember, updateMemberProfile, getAllClasses, countRegistrations, registerForClass
 
 def registerMember():
     print("\n== Member Registration ==")
@@ -108,15 +108,15 @@ def updateMemberProfileMenu():
     member_id, current_name, current_email, current_dob, current_gender, current_phone, current_goal = row
 
     
-    full_name = input("New full name (leave blank for none): ").strip()
+    full_name = input("New full name (leave blank to keep current): ").strip()
     if not full_name:
         full_name = current_name
     
-    new_email = input("New email (leave blank for none): ").strip()
+    new_email = input("New email (leave blank to keep current): ").strip()
     if not new_email:
         new_email = current_email
     
-    dob_str = input("New Date of Birth (YYYY-MM-DD, leave blank for none): ").strip()
+    dob_str = input("New Date of Birth (YYYY-MM-DD, leave blank to keep current): ").strip()
     date_of_birth = None
     if dob_str:
         try:
@@ -129,15 +129,15 @@ def updateMemberProfileMenu():
         date_of_birth = current_dob
     
     
-    gender = input("New gender (leave blank for none): ").strip()
+    gender = input("New gender (leave blank to keep current): ").strip()
     if gender == "":
         gender = current_gender
         
-    phone = input("New phone (leave blank for none): ").strip()
+    phone = input("New phone (leave blank to keep current): ").strip()
     if phone == "":
         phone = current_phone
         
-    fitness_goal = input("New fitness goal (leave blank for none): ").strip()
+    fitness_goal = input("New fitness goal (leave blank to keep current): ").strip()
     if fitness_goal == "":
         fitness_goal = current_goal
     
@@ -162,19 +162,66 @@ def updateMemberProfileMenu():
         print(f"\nGender: {updated[4]}")
         print(f"\nPhone: {updated[5]}")
         print(f"\nFitness Goal: {updated[6]}")
+
+def registerForClassMenu():
+    print("\n== Class Registration ==")
+    email = input("Member email: ").strip()
+    row = getMemberByEmail(email)
+    
+    if row is None:
+        print("No member found with that email.")
+        return
+    
+    member_id, _, email, *_= row
+    
+    classes = getAllClasses()
+    
+    if not classes:
+        print("\nNo classes are currently scheduled.")
+        return
+    
+    print("\nAvailable Classes:")
+    for class_id, name, time, cap in classes:
+        print(f"{class_id}, {name} at {time} (Capacity {cap})")
+    
+    try:
+        class_id = int(input("\nEnter class ID to register: ").strip())
+    except ValueError:
+        print("Invalid ID")
+        return
+    
+    current = countRegistrations(class_id)
+    
+    class_cap = None
+    for c in classes:
+        if c[0] == class_id:
+            class_cap = c[3]
+    
+    if class_cap is None:
+        print("Class does not exist.")
+        return
+    
+    if current >= class_cap:
+        print("Class is full. Cannot register.")
+        return
+    
+    result = registerForClass(member_id, class_id)
+    
+    if result is None:
+        print("You already registered for this class.")
+    else:
+        print("Registration successful!")    
           
         
-    
 
 def memberMenu():
     while True:
         print ("\n== Member Menu ==")
         print("1. Register new member")
-        print("2. List all members")
-        print("3. Find member by email")
-        print("4. Add health metric")
-        print("5. View health history")
-        print("6. Update member profile")
+        print("2. Add health metric")
+        print("3. View health history")
+        print("4. Update member profile")
+        print("5. Register for class")
         print("0. Back to main menu")
         
         choice = input("Select: ").strip()
@@ -182,15 +229,13 @@ def memberMenu():
         if choice == "1":
             registerMember()
         elif choice == "2":
-            listMembers()
-        elif choice == "3":
-            findMemberByEmail()
-        elif choice == "4":
             addHealthMetricMenu()
-        elif choice == "5":
+        elif choice == "3":
             viewHealthHistory()
-        elif choice == "6":
+        elif choice == "4":
             updateMemberProfileMenu()
+        elif choice == "5":
+            registerForClassMenu()
         elif choice == "0":
             break
         else:
