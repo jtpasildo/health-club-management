@@ -69,7 +69,7 @@ def roomBookingMenu():
         for booking_id, ex_class_id, ex_start, ex_end in existing:
             print(f"- Booking #{booking_id}: Class {ex_class_id} [{ex_start} - {ex_end}] ")
     else:
-        print("None")
+        print("\nExisting Bookings: None")
         
     for booking_id, ex_class_id, ex_start, ex_end in existing:
         if start_time < ex_end and end_time > ex_start:
