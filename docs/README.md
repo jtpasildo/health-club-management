@@ -35,5 +35,6 @@ python3 main.py
 Demonstrates and prints out all the operations in action
 
 ## Video Link:
+https://youtu.be/hfp04BqfF2U
 
 
