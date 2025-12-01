@@ -30,6 +30,7 @@ PGPASSWORD=(pgAdmin password)
 
 ## How to Run:
 
+cd app
 python3 main.py
 
 Demonstrates and prints out all the operations in action
