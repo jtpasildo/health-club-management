@@ -1,3 +1,12 @@
+DROP TABLE IF EXISTS maintenance_logs;
+DROP TABLE IF EXISTS equipment;
+DROP TABLE IF EXISTS room_bookings;
+DROP TABLE IF EXISTS trainer_availability;
+DROP TABLE IF EXISTS class_registrations;
+DROP TABLE IF EXISTS health_metrics;
+DROP TABLE IF EXISTS rooms;
+DROP TABLE IF EXISTS trainers;
+DROP TABLE IF EXISTS classes;
 DROP TABLE IF EXISTS members;
 
 CREATE TABLE members (
@@ -10,7 +19,6 @@ CREATE TABLE members (
     fitness_goal    VARCHAR(255)
 );
 
-DROP TABLE IF EXISTS health_metrics;
 
 CREATE TABLE health_metrics (
 	metric_id		SERIAL PRIMARY KEY,
@@ -20,8 +28,6 @@ CREATE TABLE health_metrics (
 	recorded_at		TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-DROP TABLE IF EXISTS class_registrations;
-DROP TABLE IF EXISTS classes;
 
 CREATE TABLE classes (
     class_id    SERIAL PRIMARY KEY,
@@ -39,9 +45,6 @@ CREATE TABLE class_registrations (
 );
 
 
-DROP TABLE IF EXISTS trainer_availability;
-DROP TABLE IF EXISTS trainers;
-
 
 CREATE TABLE trainers (
     trainer_id  SERIAL PRIMARY KEY,
@@ -56,9 +59,6 @@ CREATE TABLE trainer_availability (
     end_time          TIMESTAMP NOT NULL,
     CHECK (end_time > start_time)
 );
-
-DROP TABLE IF EXISTS room_bookings;
-DROP TABLE IF EXISTS rooms;
 
 
 CREATE TABLE rooms (
@@ -76,15 +76,13 @@ CREATE TABLE room_bookings (
 );
 
 
-
-
-CREATE TABLE IF NOT EXISTS equipment (
+CREATE TABLE equipment (
     equipment_id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
     room_id INTEGER REFERENCES rooms(room_id)
 );
 
-CREATE TABLE IF NOT EXISTS maintenance_logs (
+CREATE TABLE maintenance_logs (
     log_id SERIAL PRIMARY KEY,
     equipment_id INTEGER REFERENCES equipment(equipment_id) ON DELETE CASCADE,
     issue TEXT NOT NULL,
@@ -93,3 +91,37 @@ CREATE TABLE IF NOT EXISTS maintenance_logs (
 );
 
 
+CREATE INDEX idx_health_metrics_member_id_recorded_at
+    ON health_metrics (member_id, recorded_at);
+
+
+CREATE OR REPLACE VIEW unresolved_equipment_issues AS
+SELECT
+    ml.log_id,
+    e.equipment_id,
+    e.name AS equipment_name,
+    r.room_name,
+    ml.issue,
+    ml.reported_at
+FROM maintenance_logs ml
+JOIN equipment e ON ml.equipment_id = e.equipment_id
+LEFT JOIN rooms r ON e.room_id = r.room_id
+WHERE ml.resolved = FALSE;
+
+
+CREATE OR REPLACE FUNCTION set_reported_at()
+RETURNS TRIGGER AS $$
+BEGIN 
+    IF NEW.reported_at is NULL THEN
+        NEW.reported_at := NOW();
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_set_reported_at ON maintenance_logs;
+
+CREATE TRIGGER trg_set_reported_at
+BEFORE INSERT OR UPDATE ON maintenance_logs
+FOR EACH ROW
+EXECUTE FUNCTION set_reported_at();
