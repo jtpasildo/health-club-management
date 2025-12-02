@@ -1,10 +1,11 @@
 from datetime import datetime
 from db import getAllRooms, getAllClasses, getBookingsForRoom, createRoomBooking, getAllEquipment, addEquipment, reportEquipmentIssue, getOpenIssues, resolveIssue
 
-
+# Handles the flow of booking a room for a class
 def roomBookingMenu():
     print("\n== Room Booking ==")
     
+    # Fetch all rooms available
     rooms = getAllRooms()
     
     if not rooms:
@@ -14,18 +15,21 @@ def roomBookingMenu():
     print("\nAvailable Rooms:")
     for room_id, room_name in rooms:
         print(f"{room_id}: {room_name}")
-        
+    
+    # Select room ID    
     try:
         room_id = int(input("\nEnter room ID to book: ").strip())
     except ValueError:
         print("Invalid room ID.")
         return
     
+    # Validate room exists
     room_ids = [r[0] for r in rooms]
     if room_id not in room_ids:
         print("No such room.")
         return
     
+    # Fetch available classes
     classes = getAllClasses()
     
     if not classes:
@@ -35,7 +39,8 @@ def roomBookingMenu():
     print("\nAvailable Classes:")
     for class_id, class_name, class_time, cap in classes:
         print(f"{class_id}: {class_name} at {class_time} (Capacity {cap})")
-        
+    
+    # Select class ID  
     try:
         class_id = int(input("\nEnter class ID to assign to this room: ").strip())
     except ValueError:
@@ -47,10 +52,12 @@ def roomBookingMenu():
         print("No such class.")
         return
     
+    # Collect booking window
     print("\nEnter booking time window (YYYY-MM-DD HH:MM): ")
     start_str = input("Start time: ").strip()
     end_str = input("End time: ").strip()
     
+    # Convert to datetime objects
     try:
         start_time = datetime.strptime(start_str, "%Y-%m-%d %H:%M")
         end_time = datetime.strptime(end_str, "%Y-%m-%d %H:%M")
@@ -58,10 +65,12 @@ def roomBookingMenu():
         print("Invalid date and time format")
         return
     
+    # Validate time order
     if end_time <= start_time:
         print("End time must be after start time")
         return
     
+    # Get existing bookings to check conflict
     existing = getBookingsForRoom(room_id)
     
     if existing:
@@ -70,21 +79,24 @@ def roomBookingMenu():
             print(f"- Booking #{booking_id}: Class {ex_class_id} [{ex_start} - {ex_end}] ")
     else:
         print("\nExisting Bookings: None")
-        
+    
+    # Check if new booking overlaps with existing    
     for booking_id, ex_class_id, ex_start, ex_end in existing:
         if start_time < ex_end and end_time > ex_start:
             print("WARNING: This time overlaps with existing booking")
             print(f"Existing book #{booking_id}: Class {ex_class_id} [{ex_start} - {ex_end}]")
             return
     
+    # Insert booking into database
     try:
         booking_id = createRoomBooking(room_id, class_id, start_time, end_time)
         print(f"Room booked successfully with booking ID: {booking_id}")
     except Exception as e:
         print("Failed to create room booking")
         print("Error:", e)
+   
         
-
+# Display all equipment and where it is located
 def listEquipment():
     equipment = getAllEquipment()
     
@@ -96,6 +108,8 @@ def listEquipment():
         room_label = room_name if room_name else "Unassigned"
         print(f"- ID {eq_id}: {name} (Room: {room_label})")
 
+
+# Flow for adding new gym equipment
 def addEquipmentFlow():
     print("\n== Add Equipment ==")
     name = input("Equipment Name: ").strip()
@@ -104,7 +118,8 @@ def addEquipmentFlow():
         return
     
     rooms = getAllRooms()
-
+    
+    # If no rooms exist, add equipment without assignment
     if not rooms:
         print("No rooms found. Equipment will be added without a room.")
         room_id = None
@@ -123,11 +138,12 @@ def addEquipmentFlow():
                 print("Invalid room ID. Equipment will be added without a room.")
                 room_id = None
             
-    
+    # Save equipment record
     eq_id = addEquipment(name, room_id)
     print(f"Equipment added with ID: {eq_id}")
     
 
+# Flow to report an issue with equipment
 def reportIssueFlow():
     print("\n== Report Equipment Issue ==")
     
@@ -142,7 +158,7 @@ def reportIssueFlow():
         room_label = room_name if room_name else "Unassigned"
         print(f"{eq_id}: {name} (Room: {room_label})")
     
-    
+    # Select equipment ID
     try:
         eq_id = int(input("Enter equipment ID: ").strip())
     except ValueError:
@@ -161,8 +177,9 @@ def reportIssueFlow():
     
     log_id = reportEquipmentIssue(eq_id, issue)
     print(f"Issue logged with ID: {log_id}")
-        
 
+        
+# Show all unresolved maintenance issues
 def viewOpenIssues():
     open_issues = getOpenIssues()
     
@@ -175,8 +192,9 @@ def viewOpenIssues():
         print(f"- Log #{log_id}: {name} (ID {eq_id})")
         print(f"    Reported at: {reported_at}")
         print(f"    Issue: {issue}")
+    
         
-        
+# Resolve a maintenance issue by marking it closed        
 def resolveIssueFlow():
     print("\n== Resolve Issue ==")
     open_issues = getOpenIssues()
@@ -189,7 +207,7 @@ def resolveIssueFlow():
     for log_id, eq_id, name, issue, reported_at in open_issues:
         print(f"{log_id}: {name} (ID {eq_id}) - {issue} [{reported_at}]")
     
-    
+    # Select issue to resolve
     try:
         log_id = int(input("Enter log ID to resolve: ").strip())
     except ValueError:
@@ -202,6 +220,7 @@ def resolveIssueFlow():
     else:
         print("No such log ID.")
 
+# Menu for equipment maintenance
 def equipmentMenu():
     while True:
         print("\n== Equipment Maintenance ==")
@@ -228,8 +247,9 @@ def equipmentMenu():
             break
         else:
             print("Invalid choice, try again.")
+ 
    
-        
+# Main admin menu
 def adminMenu():
     while True:
         print ("\n== Admin Menu ==")

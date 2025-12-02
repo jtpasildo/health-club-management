@@ -2,6 +2,7 @@ from member import memberMenu
 from trainer import trainerMenu
 from admin import adminMenu
 
+# Main menu for navigating between roles
 def main_menu():
     while True:
         print("\n=== Health & Fitness Club System ===")

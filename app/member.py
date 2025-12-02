@@ -1,6 +1,7 @@
 from datetime import datetime
 from db import addMember, getAllMembers, getMemberByEmail, addHealthMetric, getMetricsForMember, updateMemberProfile, getAllClasses, countRegistrations, registerForClass
 
+# Handles user input and creation of a new member
 def registerMember():
     print("\n== Member Registration ==")
     full_name = input("Full name: ").strip()
@@ -9,6 +10,7 @@ def registerMember():
     gender = input("Gender: ").strip()
     phone = input("Phone: ").strip()
     
+    # Validate date
     dob = None
     if dob_str:
         try:
@@ -17,6 +19,7 @@ def registerMember():
         except ValueError:
             print("Invalid Date")
     
+    # Insert new member into database
     try:
         new_id = addMember(full_name, email, dob, gender, phone)
         print(f"Member registered with ID: {new_id}")
@@ -24,7 +27,7 @@ def registerMember():
         print("Failed to register member (email may exists already)")
         print("Error:", e)
 
-
+# Display all registered members
 def listMembers():
     print("\n== All Members ==")
     rows = getAllMembers()
@@ -36,19 +39,7 @@ def listMembers():
         member_id, full_name, email = row
         print(f"{member_id}: {full_name} <{email}>")
         
-
-def findMemberByEmail():
-    print("\n== Find Member by Email ==")
-    email = input("Email: ").strip()
-    row = getMemberByEmail(email)
-    
-    if row is None:
-        print("No member found with that email.")
-    else:
-        member_id, full_name, email, *_ = row
-        print(f"Found: {member_id}: {full_name} <{email}>")
-
-
+# Add a metric to a member's profile
 def addHealthMetricMenu():
     print("\n== Add Health Metric ==")
     email = input("Member email: ").strip()
@@ -69,6 +60,7 @@ def addHealthMetricMenu():
         print("Invalid number for metric value")
         return
     
+    # Insert a new metric into database
     try:
         metric_id = addHealthMetric(member_id, metric_type, value)
         print(f"Metric #{metric_id} for {full_name}.")
@@ -76,6 +68,7 @@ def addHealthMetricMenu():
         print("Failed to add health metric")
         print("Error:", e)
 
+# View all saved health metrics for a member
 def viewHealthHistory():
     print("\n== View Health History ==")
     email = input("Member email: ").strip()
@@ -95,7 +88,8 @@ def viewHealthHistory():
     print(f"\nHealth metrics for {full_name}:")
     for metric_id, metric_type, metric_value, recorded_at in metrics:
         print(f"- [{recorded_at}] {metric_type}: {metric_value}")
-    
+ 
+# Update specific profile fields for a member   
 def updateMemberProfileMenu():
     print("\n== Update Member Profile ==")
     email = input("Member email: ").strip()
@@ -105,9 +99,10 @@ def updateMemberProfileMenu():
         print("No member found with that email.")
         return
     
+    # Load current values
     member_id, current_name, current_email, current_dob, current_gender, current_phone, current_goal = row
 
-    
+    # Collect new values, default to current if blank
     full_name = input("New full name (leave blank to keep current): ").strip()
     if not full_name:
         full_name = current_name
@@ -128,7 +123,6 @@ def updateMemberProfileMenu():
     else:
         date_of_birth = current_dob
     
-    
     gender = input("New gender (leave blank to keep current): ").strip()
     if gender == "":
         gender = current_gender
@@ -141,6 +135,7 @@ def updateMemberProfileMenu():
     if fitness_goal == "":
         fitness_goal = current_goal
     
+    # Apply updates
     updated_rows = updateMemberProfile(member_id, full_name, new_email, date_of_birth, gender, phone, fitness_goal)
     
     if updated_rows == 0:
@@ -163,6 +158,8 @@ def updateMemberProfileMenu():
         print(f"\nPhone: {updated[5]}")
         print(f"\nFitness Goal: {updated[6]}")
 
+
+# Register a member for a scheduled class, checking capacity and duplicates
 def registerForClassMenu():
     print("\n== Class Registration ==")
     email = input("Member email: ").strip()
@@ -184,12 +181,14 @@ def registerForClassMenu():
     for class_id, name, time, cap in classes:
         print(f"{class_id}, {name} at {time} (Capacity {cap})")
     
+    # Select class
     try:
         class_id = int(input("\nEnter class ID to register: ").strip())
     except ValueError:
         print("Invalid ID")
         return
-    
+   
+    # Check class capacity
     current = countRegistrations(class_id)
     
     class_cap = None
@@ -211,9 +210,8 @@ def registerForClassMenu():
         print("You already registered for this class.")
     else:
         print("Registration successful!")    
-          
-        
-
+                 
+# Main member menu
 def memberMenu():
     while True:
         print ("\n== Member Menu ==")

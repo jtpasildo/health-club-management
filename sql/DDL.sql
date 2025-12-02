@@ -66,6 +66,7 @@ CREATE TABLE rooms (
     room_name   VARCHAR(100) NOT NULL UNIQUE
 );
 
+
 CREATE TABLE room_bookings (
     booking_id   SERIAL PRIMARY KEY,
     room_id      INTEGER NOT NULL REFERENCES rooms(room_id) ON DELETE CASCADE,
@@ -82,6 +83,7 @@ CREATE TABLE equipment (
     room_id INTEGER REFERENCES rooms(room_id)
 );
 
+
 CREATE TABLE maintenance_logs (
     log_id SERIAL PRIMARY KEY,
     equipment_id INTEGER REFERENCES equipment(equipment_id) ON DELETE CASCADE,
@@ -90,11 +92,12 @@ CREATE TABLE maintenance_logs (
     resolved BOOLEAN DEFAULT FALSE
 );
 
-
+-- INDEX to speed up health metric lookups by member and sort by most recent
 CREATE INDEX idx_health_metrics_member_id_recorded_at
     ON health_metrics (member_id, recorded_at);
 
 
+-- VIEW that returns all unresolved equipment issues with room & equipment
 CREATE OR REPLACE VIEW unresolved_equipment_issues AS
 SELECT
     ml.log_id,
@@ -109,6 +112,7 @@ LEFT JOIN rooms r ON e.room_id = r.room_id
 WHERE ml.resolved = FALSE;
 
 
+-- TRIGGER function that automatically sets reported_at timestamp if missing
 CREATE OR REPLACE FUNCTION set_reported_at()
 RETURNS TRIGGER AS $$
 BEGIN 
@@ -119,8 +123,11 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- Remove old TRIGGER if it exists
 DROP TRIGGER IF EXISTS trg_set_reported_at ON maintenance_logs;
 
+-- TRIGGER that runs before inserting or updating a maintenance log
+-- Ensures every issue has a valid reported_at timestamp
 CREATE TRIGGER trg_set_reported_at
 BEFORE INSERT OR UPDATE ON maintenance_logs
 FOR EACH ROW

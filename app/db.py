@@ -13,14 +13,17 @@ def get_conn():
         user=os.getenv("PGUSER"),
         password=os.getenv("PGPASSWORD")
     )
-    
-    
+
+
+# MEMBER FUNCTION QUERIES #
+
+# Returns all members    
 def getAllMembers():
     with get_conn() as conn, conn.cursor() as cur:
         cur.execute("SELECT member_id, full_name, email FROM members ORDER BY member_id;")
         return cur.fetchall()
 
-
+# Insert a new member and return the member id
 def addMember(full_name, email, date_of_birth=None, gender=None, phone=None):
     with get_conn() as conn, conn.cursor() as cur:
         cur.execute("""
@@ -31,7 +34,7 @@ def addMember(full_name, email, date_of_birth=None, gender=None, phone=None):
         conn.commit()
         return cur.fetchone()[0] 
 
-
+# Look up a member and return full profile details
 def getMemberByEmail(email):
     with get_conn() as conn, conn.cursor() as cur:
         cur.execute("""
@@ -41,7 +44,7 @@ def getMemberByEmail(email):
                     """, (email,))
         return cur.fetchone()
     
-
+# Add a new health metric entry for a member
 def addHealthMetric(member_id, metric_type, metric_value):
     with get_conn() as conn, conn.cursor() as cur:
         cur.execute("""
@@ -52,7 +55,7 @@ def addHealthMetric(member_id, metric_type, metric_value):
         conn.commit()
         return cur.fetchone()[0] 
     
-
+# Get all health metrics for a memeber, newest first
 def getMetricsForMember(member_id):
     with get_conn() as conn, conn.cursor() as cur:
         cur.execute("""
@@ -63,7 +66,7 @@ def getMetricsForMember(member_id):
                     """, (member_id,))
         return cur.fetchall()
     
-
+# Update all profile fields for a memeber
 def updateMemberProfile(member_id, full_name, email, date_of_birth, gender, phone, fitness_goal):
     with get_conn() as conn, conn.cursor() as cur:
         cur.execute("""
@@ -79,7 +82,7 @@ def updateMemberProfile(member_id, full_name, email, date_of_birth, gender, phon
         conn.commit()
         return cur.rowcount
     
-
+# Return all classes with time and capacity
 def getAllClasses():
     with get_conn() as conn, conn.cursor() as cur:
         cur.execute("""
@@ -87,13 +90,15 @@ def getAllClasses():
                     """)
         return cur.fetchall()
 
+# Count how many registrations exist for a given class
 def countRegistrations(class_id):
     with get_conn() as conn, conn.cursor() as cur:
         cur.execute("""
                     SELECT COUNT(*) FROM class_registrations WHERE class_id = %s;
                     """, (class_id,))
         return cur.fetchone()[0] 
-    
+
+# Register a member for a class
 def registerForClass(member_id, class_id):
     with get_conn() as conn, conn.cursor() as cur:
         cur.execute("""
@@ -105,7 +110,10 @@ def registerForClass(member_id, class_id):
         conn.commit()
         return cur.fetchone()
     
-##TRAINER
+
+# TRAINER FUNCTION QUERIES #
+
+# Look up trainer by email and return id, name, and email
 def getTrainerByEmail(email):
     with get_conn() as conn, conn.cursor() as cur:
         cur.execute("""
@@ -114,7 +122,8 @@ def getTrainerByEmail(email):
                     WHERE email = %s;
                     """, (email,))
         return cur.fetchone()
-    
+
+# Add an availability window for a trainer
 def addTrainerAvailability(trainer_id, start_time, end_time):
     with get_conn() as conn, conn.cursor() as cur:
         cur.execute("""
@@ -124,7 +133,8 @@ def addTrainerAvailability(trainer_id, start_time, end_time):
                     """, (trainer_id, start_time, end_time))
         conn.commit()
         return cur.fetchone()[0] 
-    
+
+# Get all avalability windows for a trainer    
 def getAvailabilityForTrainer(trainer_id):
     with get_conn() as conn, conn.cursor() as cur:
         cur.execute("""
@@ -135,6 +145,7 @@ def getAvailabilityForTrainer(trainer_id):
                     """, (trainer_id,))
         return cur.fetchall()
     
+# Search members by name
 def searchMembersByName(name_query):
     with get_conn() as conn, conn.cursor() as cur:
         cur.execute("""
@@ -145,6 +156,7 @@ def searchMembersByName(name_query):
                     """, (f"%{name_query}%",))
         return cur.fetchall()
 
+# Get the latest metric recorded for a member
 def getLatestMetric(member_id):
     with get_conn() as conn, conn.cursor() as cur:
         cur.execute("""
@@ -156,7 +168,7 @@ def getLatestMetric(member_id):
                     """, (member_id,))
         return cur.fetchone()
     
-    
+# Return all rooms 
 def getAllRooms():
     with get_conn() as conn, conn.cursor() as cur:
         cur.execute("""
@@ -166,6 +178,7 @@ def getAllRooms():
                     """)
         return cur.fetchall() 
     
+# Get all bookings for a specific room
 def getBookingsForRoom(room_id):
     with get_conn() as conn, conn.cursor() as cur:
         cur.execute("""
@@ -175,7 +188,8 @@ def getBookingsForRoom(room_id):
                     ORDER BY start_time;
                     """, (room_id,))
         return cur.fetchall()
-    
+ 
+# Create a new room booking and return the booking_id   
 def createRoomBooking(room_id, class_id, start_time, end_time):
     with get_conn() as conn, conn.cursor() as cur:
         cur.execute("""
@@ -186,7 +200,7 @@ def createRoomBooking(room_id, class_id, start_time, end_time):
         conn.commit()
         return cur.fetchone()[0]
     
-
+# Return all equipment with associated room name
 def getAllEquipment():
     with get_conn() as conn, conn.cursor() as cur:
         cur.execute("""
@@ -199,6 +213,7 @@ def getAllEquipment():
                     """)
         return cur.fetchall()
     
+# Add a new piece of equipment and assign it to a room
 def addEquipment(name, room_id=None):
     with get_conn() as conn, conn.cursor() as cur:
         cur.execute("""
@@ -209,6 +224,7 @@ def addEquipment(name, room_id=None):
         conn.commit()
         return cur.fetchone()[0] 
 
+# Create a maintenance log entry for an equipment issue
 def reportEquipmentIssue(equipment_id, issue):
     with get_conn() as conn, conn.cursor() as cur:
         cur.execute("""
@@ -218,7 +234,8 @@ def reportEquipmentIssue(equipment_id, issue):
                     """, (equipment_id, issue))
         conn.commit()
         return cur.fetchone()[0] 
-    
+
+# Return all unresolved maintenance issues with equipment details    
 def getOpenIssues():
     with get_conn() as conn, conn.cursor() as cur:
         cur.execute("""
@@ -233,7 +250,8 @@ def getOpenIssues():
                     ORDER BY ml.reported_at;
                     """)
         return cur.fetchall()
-    
+
+# Mark a maintenance log as resolved    
 def resolveIssue(log_id):
     with get_conn() as conn, conn.cursor() as cur:
         cur.execute("""

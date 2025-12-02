@@ -1,6 +1,7 @@
 from datetime import datetime
 from db import getTrainerByEmail, addTrainerAvailability, getAvailabilityForTrainer, searchMembersByName, getLatestMetric
 
+# Handles input and validation for creating a new trainer availability time slot
 def setAvailabilityMenu(trainer_id):
     print("\n== Set Availability ==")
     print("Enter time in format: YYYY-MM-DD HH:MM")
@@ -8,6 +9,7 @@ def setAvailabilityMenu(trainer_id):
     start_str = input("Start time: ").strip()
     end_str = input("End time: ").strip()
     
+    # Validate date/time input
     try:
         start_time = datetime.strptime(start_str, "%Y-%m-%d %H:%M")
         end_time = datetime.strptime(end_str, "%Y-%m-%d %H:%M")
@@ -19,21 +21,23 @@ def setAvailabilityMenu(trainer_id):
         print("End time must be after start time")
         return
     
+    # Check for overlap with existing availability
     existing = getAvailabilityForTrainer(trainer_id)
-    
     for avail_id, ex_start, ex_end in existing:
         if start_time < ex_end and end_time > ex_start:
             print("WARNING: This time overlaps with existing availability")
             print(f"[{ex_start} - {ex_end}] (ID {avail_id})")
             return
     
+    # Save availability to database
     try:
         availability_id = addTrainerAvailability(trainer_id, start_time, end_time)
         print(f"Availability saved with ID: {availability_id}")
     except Exception as e:
         print("Failed to save avalability")
         print("Error:", e)
-        
+
+# Display all availability slots for the logged in trainer        
 def viewAvailabilityMenu(trainer_id):
     print("\n== My Availability ==")
     slots = getAvailabilityForTrainer(trainer_id)
@@ -45,7 +49,7 @@ def viewAvailabilityMenu(trainer_id):
     for avail_id, start_time, end_time in slots:
         print(f"- ID {avail_id}: {start_time} to {end_time}")
 
-
+# Allows a trainer to look member by name and view latest metric + goal
 def memberLookupMenu():
     print("\n== Member Lookup ==")
     name_query = input("Enter member name: ").strip()
@@ -64,13 +68,14 @@ def memberLookupMenu():
         print(f"Email: {email}")
         print(f"Goal: {goal_display}")
         
+        # Show latest health metric if one exists
         if latest:
             metric_type, metric_value, recorded_at = latest
             print(f"Last Metric: [{recorded_at}] {metric_type}: {metric_value}")
         else:
             print("Last Metric: (none)")
             
-    
+# Main trainer menu + trainer login   
 def trainerMenu():
     print("\n== Trainer Login ==")
     email = input ("Trainer email: ").strip()
