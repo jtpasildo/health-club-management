@@ -1,8 +1,7 @@
-## Jordan Pasildo
-## 101288061
+### Jordan Pasildo - 101288061
 
-### Health Club Management FINAL COMP 3005 PROJECT
-This project demonstrates how to interact with a PostgreSQL database using Python
+# Health and Fitness Club Management System FINAL COMP 3005 PROJECT
+This project is a terminal-based Health and Fitness Club Management System built in Python using PostgreSQL database
 
 ### Requirements:
 Python 3
