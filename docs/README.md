@@ -4,13 +4,15 @@
 This project is a terminal-based Health and Fitness Club Management System built in Python using PostgreSQL database
 
 ### Requirements:
-Python 3
-PostgreSQL or pgAdmin installed and running locally
-psycopg2-binary
-python-dotenv
+- Python 3
+- PostgreSQL or pgAdmin installed and running locally
+- psycopg2-binary
+- python-dotenv
 
 Install dependencies:
+```bash
 pip install -r requirements.txt
+```
 
 ## Database Setup:
 1. Create database in pgadmin
