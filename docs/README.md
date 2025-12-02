@@ -1,6 +1,11 @@
 # Health and Fitness Club Management System FINAL COMP 3005 PROJECT
 ### Jordan Pasildo - 101288061
-This project is a terminal-based Health and Fitness Club Management System built in Python using PostgreSQL database
+This project is a terminal-based Health and Fitness Club Management System built in Python using PostgreSQL database.
+
+It provides a complete demonstration of core database concepts through fully implemented features for Members, Trainers, and Admins, including data entry, validation, scheduling, searching, and management workflows.
+
+The system contains practical database concepts such as relational design, SQL operations, multi-table queries, triggers, views, and index usage within a working application
+
 
 ## Requirements:
 - Python 3
