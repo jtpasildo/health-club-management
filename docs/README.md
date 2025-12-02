@@ -1,9 +1,8 @@
-### Jordan Pasildo - 101288061
-
 # Health and Fitness Club Management System FINAL COMP 3005 PROJECT
+### Jordan Pasildo - 101288061
 This project is a terminal-based Health and Fitness Club Management System built in Python using PostgreSQL database
 
-### Requirements:
+## Requirements:
 - Python 3
 - PostgreSQL or pgAdmin installed and running locally
 - psycopg2-binary
@@ -14,7 +13,7 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
-### Database Setup:
+## Database Setup:
 1. Create database in pgadmin
 
 2. Run the .sql scripts in the sql/ folder in pgAdmin:
@@ -31,7 +30,7 @@ PGUSER=postgres
 PGPASSWORD=(pgAdmin password)
 ```
 
-### How to Run:
+## How to Run:
 ```bash
 cd app
 python3 main.py
