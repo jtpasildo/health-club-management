@@ -14,7 +14,7 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
-## Database Setup:
+### Database Setup:
 1. Create database in pgadmin
 
 2. Run the .sql scripts in the sql/ folder in pgAdmin:
@@ -23,13 +23,15 @@ pip install -r requirements.txt
 - Run the SQL scripts in the sql/ folder in pgAdmin or psql
 
 3. Create a .env file:
+```bash
 PGHOST=localhost
 PGPORT=(port number)
 PGDATABASE=(db name)
 PGUSER=postgres
 PGPASSWORD=(pgAdmin password)
+```
 
-## How to Run:
+### How to Run:
 ```bash
 cd app
 python3 main.py
