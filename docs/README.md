@@ -18,9 +18,9 @@ pip install -r requirements.txt
 1. Create database in pgadmin
 
 2. Run the .sql scripts in the sql/ folder in pgAdmin:
-DDL.sql -> creates the tables
-DML.sql -> inserts the sample data
-Run the SQL scripts in the sql/ folder in pgAdmin or psql
+- DDL.sql -> creates the tables
+- DML.sql -> inserts the sample data
+- Run the SQL scripts in the sql/ folder in pgAdmin or psql
 
 3. Create a .env file:
 PGHOST=localhost
@@ -30,9 +30,10 @@ PGUSER=postgres
 PGPASSWORD=(pgAdmin password)
 
 ## How to Run:
-
+```bash
 cd app
 python3 main.py
+```
 
 Demonstrates and prints out all the operations in action
 
