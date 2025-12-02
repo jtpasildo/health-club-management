@@ -4,7 +4,7 @@ This project is a terminal-based Health and Fitness Club Management System built
 
 It provides a complete demonstration of core database concepts through fully implemented features for Members, Trainers, and Admins, including data entry, validation, scheduling, searching, and management workflows.
 
-The system contains practical database concepts such as relational design, SQL operations, multi-table queries, triggers, views, and index usage within a working application
+The system contains practical database concepts such as a relational design, SQL operations, multi-table queries, triggers, views, and index usage within a working application
 
 
 ## Requirements:
